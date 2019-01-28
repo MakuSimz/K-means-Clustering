@@ -21,6 +21,8 @@ import org.apache.commons.collections4.map.MultiValueMap;
 public class Kmeans {
 
     public Point[] CentroidsPos = null;
+    public Point[] oldCentroidsPos = null;
+    
 
     private double calculateEucledianDistance(Point point1, Point point2) {
         double distance;
@@ -108,7 +110,7 @@ public class Kmeans {
         return newPoints;
     }
 
-    public MultiValueMap<Integer, Point> clusterData(int k, List<Point> wifiGeoPoints, int iterations) {
+    public MultiValueMap<Integer, Point> clusterData(int k, List<Point> wifiGeoPoints, int iterations,double err) {
         CentroidsPos = randomPlaceCentroids(k);
        
         MultiValueMap<Integer, Point> clustersList = placePointInCentroid(CentroidsPos, wifiGeoPoints);
@@ -129,11 +131,24 @@ public class Kmeans {
             CentroidsPos = randomPlaceCentroids(k); 
             clustersList = placePointInCentroid(CentroidsPos, wifiGeoPoints);
         }
+         oldCentroidsPos=CentroidsPos;
         for (int i = 0; i < iterations; i++) {
             CentroidsPos = calculateNewClusterPosition(k, clustersList);
             System.out.println("Centroid Position:"+CentroidsPos[1].toString());
             clustersList = placePointInCentroid(CentroidsPos, wifiGeoPoints);
-           // System.out.println("Iteration: " + i );
+            System.out.println("Diff: "+calculateEucledianDistance(oldCentroidsPos[0], CentroidsPos[0]));
+            if(calculateEucledianDistance(oldCentroidsPos[0], CentroidsPos[0])==err){
+                if(calculateEucledianDistance(oldCentroidsPos[1], CentroidsPos[1])==err){
+                    
+                    if(calculateEucledianDistance(oldCentroidsPos[2], CentroidsPos[2])==err){
+                         System.out.println("Stopped ar Iteration: " + i );
+                        break;
+                    }
+                }
+                
+            }
+            oldCentroidsPos=CentroidsPos;
+           
 
         }
         System.out.println("==============================After K-means:================================= ");
